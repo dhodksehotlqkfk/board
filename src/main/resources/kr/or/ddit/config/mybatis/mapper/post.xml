@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="post">
+
+	<select id="getAllBoardPost" resultType="postVO"
+		parameterType="int">
+		select * from test_post where boardId = #{boardId}
+	</select>
+
+	<insert id="insertPost" parameterType="postVO">
+
+		insert into
+		test_post(boardId, parentPost, postContent, postId, postReg_dt,
+		postTitle, postUse, userId, gn)
+		VALUES (#{boardId}, case when NVL(#{parentPost},0) = 0 then NULL else #{parentPost} end,
+		#{postContent}, test_post_seq.nextval, sysdate, #{postTitle}, '사용',
+		#{userId}, case when NVL(#{gn},0) = 0 then test_post_seq.currval else #{gn} end)
+		<selectKey keyProperty="postId" resultType="Integer" >
+				select  test_post_seq.currval from dual
+		</selectKey>
+	</insert>
+
+	<update id="updatePost" parameterType="postVO">
+		update test_post set
+		postContent = #{postContent}, postTitle = #{postTitle}
+		where postId= #{postId}
+	</update>
+
+	<update id="notUsePost" parameterType="Integer">
+		update test_post set
+		postUse = '미사용'
+		where postId = #{postId}
+	</update>
+
+	<select id="getPost" parameterType="Integer" resultType="postVO">
+		select * from test_post where
+		postId = #{postId}
+	</select>
+
+	<select id="getPostPagingList" parameterType="map"
+		resultType="postVO">
+      select a.*
+      from
+      (select rownum rn, a.*
+       from
+          (select postId, parentPost, lpad(' ', (level-1)*4, ' ') || POSTTITLE POSTTITLE, USERID, postreg_dt, level, postUse
+            from test_post a
+            where boardId = #{boardId}
+           start with parentPost is null
+           connect by prior postId = parentPost
+           order SIBLINGS by gn desc, postId) a) a
+      where rn between (#{page}-1)*#{pagesize}+1 and #{page}*#{pagesize}
+	</select>
+
+	<select id="getPostTotalCnt" parameterType="Integer" resultType="Integer">
+		select count(*) from test_post where boardId = #{boardId}
+	</select>
+
+</mapper>

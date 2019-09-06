@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cmt">
+
+	<insert id="insertCmt" parameterType="cmtVO">
+		insert into test_cmt(cmtContent, cmtId, cmtReg_dt, postId, userId, cmtUse)
+		values(#{cmtContent}, TEST_CMT_SEQ.nextval, sysdate, #{postId}, #{userId} , '사용')
+	</insert>
+
+	<delete id="deleteCmt" parameterType="Integer">
+		UPDATE test_cmt SET cmtUse = '미사용' where cmtId = #{cmtId}
+	</delete>
+
+	<select id="getPostCmtList" parameterType="Integer" resultType="cmtVO">
+		select * from test_cmt where postId = #{postId}
+	</select>
+
+</mapper>
